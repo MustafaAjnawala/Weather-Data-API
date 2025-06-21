@@ -120,54 +120,53 @@ The API returns weather data in JSON format.
 1. **Clone the Repository**:
 
    ```bash
-   git clone https://github.com/alinakitieva/weather_api.git
-   cd weather_api
+   https://github.com/MustafaAjnawala/Weather-Data-API.git
+   cd weather-data-api
    ```
 
-2. **Set Up Virtual Environment**:
+2. **Set Up Node.js Virtual Environment**:
 
    ```bash
-   python3 -m venv venv
-   source venv/bin/activate
+   npm init -y
    ```
 
 3. **Install Dependencies**:
 
    ```bash
-   pip install -r requirements.txt
+   npm install
    ```
 
 4. **Set Environment Variables**:
    Create a `.env` file and add your Visual Crossing API key:
 
    ```bash
-   WEATHER_API_KEY=your_api_key
+   PORT=8080
+   API_KEY=Your_API_Key
+   REDIS_HOST=127.0.0.1
+   REDIS_PORT=6379
+   BASE_URL=https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline
    ```
 
 5. **Run Redis**:
-   Make sure Redis is running locally. If Redis isn't installed, you can install it on macOS using:
-
-   ```bash
-   brew install redis
-   ```
-
+   Make sure Redis is running locally. If Redis isn't installed, you can install it on windows from this URL: https://github.com/tporadowski/redis/releases
+   And then make sure to run below command on your Command Line interface
    Start Redis:
 
    ```bash
    redis-server
    ```
 
-6. **Run the Flask App**:
+6. **Run the Node App**:
 
    ```bash
-   python app.py
+   npm run dev
    ```
 
 7. **Test the API**:
    Use `curl` or a browser to access the API:
 
    ```bash
-   curl "http://localhost:5000/weather?location=Moscow&date1=2024-10-10"
+   curl "http://localhost:8080/weather/nashik/2024-12-1"
    ```
 
 ## Rate Limiting
