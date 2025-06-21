@@ -1,19 +1,13 @@
 const express = require("express");
 const dotenv = require("dotenv");
-const axios = require("axios");
 const rateLimiter = require("express-rate-limit");
 
 dotenv.config();
 const port = process.env.PORT;
 
-const {
-  redisClient,
-  connectToRedis,
-  checkinRedis,
-  setInRedis,
-  getTTL,
-} = require("./cache");
+const { connectToRedis } = require("./cache");
 
+const fetchData = require("./weather");
 const app = express();
 
 const limiter = rateLimiter({
@@ -28,25 +22,6 @@ connectToRedis();
 
 const baseURL = process.env.BASE_URL;
 const apiKey = process.env.API_KEY;
-
-async function fetchData(url) {
-  try {
-    const redisData = await checkinRedis(url);
-    if (redisData) {
-      console.log("\nCache Hit for key:", url);
-      const ttl = await redisClient.ttl(url);
-      console.log("Time(sec) left before expiration of data:", ttl);
-      return redisData;
-    } else {
-      console.log("\nCache Miss\nSetting data in redis cache for key:", url);
-      const response = await axios.get(url); //http get request to the 3rd party weather service
-      await setInRedis(url, response.data);
-      return response.data;
-    }
-  } catch (err) {
-    console.error("Error is:" + err);
-  }
-}
 
 app.get(
   [
@@ -67,12 +42,13 @@ app.get(
         pingUrl += `/${date1}`;
       }
       pingUrl += `?unitGroup=metric&key=${apiKey}&contentType=json`;
-      //   console.log(pingUrl); //for debuggin purposes
-      const data = await fetchData(pingUrl); //getting the city weather data
+      //getting the city weather data
+      const data = await fetchData(pingUrl);
 
-      //if city not entered properly
-      if (!data) return res.json({ msg: "Please enter correct city" });
-      //return the data
+      //if endpoints not correctly entered
+      if (!data)
+        return res.json({ msg: "Please enter url parameters correctly" });
+
       return res.json(data);
     } catch (err) {
       console.log(err);
