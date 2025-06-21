@@ -1,15 +1,18 @@
 const express = require("express");
 const dotenv = require("dotenv");
-const redis = require("redis");
 const axios = require("axios");
 const rateLimiter = require("express-rate-limit");
 
 dotenv.config();
 const port = process.env.PORT;
 
-const redisClient = redis.createClient({
-  url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
-});
+const {
+  redisClient,
+  connectToRedis,
+  checkinRedis,
+  setInRedis,
+  getTTL,
+} = require("./cache");
 
 const app = express();
 
@@ -21,23 +24,10 @@ const limiter = rateLimiter({
 
 app.use(limiter);
 
-async function connectToRedis() {
-  try {
-    await redisClient.connect();
-    console.log("Redis connected");
-  } catch (err) {
-    console.log("error in connecting to redis:", err);
-  }
-}
 connectToRedis();
 
 const baseURL = process.env.BASE_URL;
 const apiKey = process.env.API_KEY;
-
-async function checkinRedis(url) {
-  const cacheData = await redisClient.get(url);
-  return cacheData ? JSON.parse(cacheData) : null;
-}
 
 async function fetchData(url) {
   try {
@@ -50,8 +40,7 @@ async function fetchData(url) {
     } else {
       console.log("\nCache Miss\nSetting data in redis cache for key:", url);
       const response = await axios.get(url); //http get request to the 3rd party weather service
-      await redisClient.set(url, JSON.stringify(response.data), { EX: 43200 }); //12hr expiration time
-
+      await setInRedis(url, response.data);
       return response.data;
     }
   } catch (err) {
