@@ -3,7 +3,7 @@ const dotenv = require("dotenv");
 const rateLimiter = require("express-rate-limit");
 
 dotenv.config();
-const port = process.env.PORT;
+const port = process.env.PORT || 8080;
 
 const { connectToRedis } = require("./cache");
 
